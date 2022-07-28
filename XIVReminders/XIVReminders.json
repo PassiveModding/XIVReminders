@@ -1,0 +1,15 @@
+﻿{
+  "Author": "Ramen",
+  "Name": "XIVReminders",
+  "Punchline": "XIVReminders",
+  "Description": "XIVReminders",
+  "Tags": [ "Airship", "Gardening", "Crops", "Retainer", "Multiple Characters", "Account", "Timer", "Submarine", "Submersible", "Tasks", "Cactpot" ],
+  "InternalName": "XIVReminders",
+  "AssemblyVersion": "1.0.0.0",
+  "RepoUrl": null,
+  "ApplicableVersion": "any",
+  "DalamudApiLevel": 6,
+  "LoadPriority": 0,
+  "ImageUrls": [],
+  "IconUrl": null
+}
