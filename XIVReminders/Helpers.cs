@@ -29,6 +29,17 @@ namespace XIVReminders
             return true;
         }
 
+        public static string FormatTimeSpan(TimeSpan ts)
+        {
+            var sb = new StringBuilder();
+            if (ts.TotalDays >= 1) sb.Append($"{ts.Days}d ");
+            if (ts.Hours > 0) sb.Append($"{ts.Hours}h ");
+            if (ts.Minutes > 0) sb.Append($"{ts.Minutes}m ");
+            if (ts.Seconds > 0) sb.Append($"{ts.Seconds}s ");
+
+            return sb.ToString().TrimEnd();
+        }
+
         public static void RenderRow(string name, string value)
         {
             ImGui.TableNextRow();

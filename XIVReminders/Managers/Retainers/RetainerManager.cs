@@ -99,21 +99,25 @@ namespace XIVReminders.Managers.Retainers
                 if (retainer.IsHidden) continue;
                 if (retainer.TimeStamp > DateTime.UtcNow)
                 {
+                    if (Config.Retainers.HideRetainersUntilComplete) continue;
                     var diff = retainer.TimeStamp - DateTime.UtcNow;
-                    if (diff < TimeSpan.FromHours(1))
-                    {
-                        Helpers.RenderRow($"{retainer.Name} on venture", diff.ToString(@"mm\:ss"));
-                    }
-                    else
-                    {
-                        Helpers.RenderRow($"{retainer.Name} on venture", diff.ToString(@"hh\:mm\:ss"));
-                    }
+                    Helpers.RenderRow($"{retainer.Name}", Helpers.FormatTimeSpan(diff));
+                    continue;
                 }
+
+                if (retainer.TimeStamp.Year < 2000) Helpers.RenderRow($"{retainer.Name}", "Pending");
                 else
                 {
-                    Helpers.RenderRow($"{retainer.Name} complete", retainer.TimeStamp.ToString("dd MMM"));
+                    var since = DateTime.UtcNow - retainer.TimeStamp;
+                    var sinceStr = Helpers.FormatTimeSpan(since);
+                    Helpers.RenderRow($"{retainer.Name} complete", sinceStr.Length != 0 ? $"{sinceStr} ago" : "Now");
                 }
             }
+        }
+
+        public void DrawExtraWindows()
+        {
+
         }
 
         public IManagerConfig GetConfig()

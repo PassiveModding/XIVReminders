@@ -9,6 +9,7 @@ namespace XIVReminders.Managers.Gear
     internal class GearConfig : IManagerConfig
     {
         public bool Enabled { get; set; }
+        public bool ShowExtraWindow { get; set; }
         public bool Spiritbonds { get; set; }
         public bool ShowMateriaExtractionButton { get; set; }
         public bool Repair { get; set; }

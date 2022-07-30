@@ -108,6 +108,10 @@ namespace XIVReminders.Managers.Items
             }
         }
 
+        public void DrawExtraWindows()
+        {
+
+        }
 
         public IManagerConfig GetConfig()
         {

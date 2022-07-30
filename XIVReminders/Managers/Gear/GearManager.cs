@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using Dalamud.Interface;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -69,9 +70,17 @@ namespace XIVReminders.Managers.Gear
         {
             if (Config?.Gear == null) return;
             var enabled = Config.Gear.Enabled;
-            if (ImGui.Checkbox("Enabled##GearTeacker", ref enabled) && enabled != Config.Gear.Enabled)
+            if (ImGui.Checkbox("Enabled##gearmanager", ref enabled) && enabled != Config.Gear.Enabled)
             {
                 Config.Gear.Enabled = enabled;
+                Config.Save();
+            }
+
+            ImGui.NewLine();
+            var extraWindow = Config.Gear.ShowExtraWindow;
+            if (ImGui.Checkbox("Show Duty Window##gearmanager", ref extraWindow) && extraWindow != Config.Gear.ShowExtraWindow)
+            {
+                Config.Gear.ShowExtraWindow = extraWindow;
                 Config.Save();
             }
 
@@ -122,17 +131,56 @@ namespace XIVReminders.Managers.Gear
             ImGui.PopItemWidth();
         }
 
+        private ImGuiWindowFlags extraWindowFlags =
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse |
+                         ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize |
+                         ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoDocking;
+        public void DrawExtraWindows()
+        {
+            if (Config?.Gear == null) return;
+            if (!Config.Gear.Enabled) return;
+            if (!Config.Gear.ShowExtraWindow) return;
+            if (!Config.Gear.Repair) return;
+
+            // assuming low > critical threshold
+            if (MinConditionPercent >= Config.Gear.LowConditionThreshold)
+            {
+                return;
+            }
+
+            var show = Config.Gear.ShowExtraWindow;
+
+            if (ImGui.Begin("XIVReminder##extrarepairwindow", ref show, extraWindowFlags ))
+            {
+                if (MinConditionPercent < Config.Gear.CriticalConditionThreshold)
+                    ImGui.Text($"Gear Condition Critical [{MinConditionPercent}%%]");
+                else
+                    ImGui.Text($"Gear Condition Low [{MinConditionPercent}%%]");
+
+                if (Config.Gear.ShowRepairButton)
+                {
+                    ImGui.SameLine();
+                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "repairbutton"))
+                    {
+                        XivCommon.Functions.Chat.SendMessage("/gaction repair");
+                    }
+                }
+
+                ImGui.End();
+            }
+        }
+
         public void DrawUiMenu()
         {
             if (Config?.Gear == null) return;
             if (!Config.Gear.Enabled) return;
             if (Config.Gear.Spiritbonds && MaxSpiritBondPercent >= 100)
             { 
-                Helpers.RenderRow($"Spiritbond", $"{MaxSpiritBondPercent}%");
+                Helpers.RenderRow($"Spiritbond", $"{MaxSpiritBondPercent}%%");
                 if (Config.Gear.ShowMateriaExtractionButton)
                 {
                     ImGui.SameLine();
-                    if (ImGui.Button("Extract"))
+                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "extractbutton"))
                     {
                         XivCommon.Functions.Chat.SendMessage("/gaction \"Materia Extraction\"");
                     }
@@ -141,21 +189,23 @@ namespace XIVReminders.Managers.Gear
 
             if (Config.Gear.Repair)
             {
-                if (MinConditionPercent < Config.Gear.CriticalConditionThreshold || MinConditionPercent < Config.Gear.LowConditionThreshold)
+                if (MinConditionPercent >= Config.Gear.CriticalConditionThreshold && MinConditionPercent >= Config.Gear.LowConditionThreshold)
                 {
-                    if (MinConditionPercent < Config.Gear.CriticalConditionThreshold)
-                        Helpers.RenderRow($"Gear Condition Critical", $"{MinConditionPercent}%");
-                    else if (MinConditionPercent < Config.Gear.LowConditionThreshold)
-                        Helpers.RenderRow($"Gear Condition Low", $"{MinConditionPercent}%");
+                    return;
+                }
 
+                if (MinConditionPercent < Config.Gear.CriticalConditionThreshold)
+                    Helpers.RenderRow($"Gear Condition Critical", $"{MinConditionPercent}%%");
+                else if (MinConditionPercent < Config.Gear.LowConditionThreshold)
+                    Helpers.RenderRow($"Gear Condition Low", $"{MinConditionPercent}%%");
+
+                ImGui.SameLine();
+                if (Config.Gear.ShowRepairButton)
+                {
                     ImGui.SameLine();
-                    if (Config.Gear.ShowRepairButton)
+                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "repairbutton"))
                     {
-                        ImGui.SameLine();
-                        if (ImGui.Button("Repair"))
-                        {
-                            XivCommon.Functions.Chat.SendMessage("/gaction repair");
-                        }
+                        XivCommon.Functions.Chat.SendMessage("/gaction repair");
                     }
                 }
             }

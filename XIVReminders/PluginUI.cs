@@ -25,12 +25,22 @@ namespace XIVReminders
         {
             try
             {
-                DrawUI();
                 DrawConfig();
+
+                DrawUI();
+                DrawExtraWindows();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+        }
+
+        private void DrawExtraWindows()
+        {
+            foreach (var manager in Managers)
+            {
+                manager.DrawExtraWindows();
             }
         }
 
@@ -46,7 +56,7 @@ namespace XIVReminders
 
                 if (ImGui.BeginTabBar("ConfigMenuBar"))
                 {
-                    if (ImGui.BeginTabItem("Config"))
+                    if (ImGui.BeginTabItem("Config##mainconfigtab"))
                     {
                         var hideDuringCombat = Config.HideDuringCombat;
                         if (ImGui.Checkbox("Hide During Combat", ref hideDuringCombat) && hideDuringCombat != Config.HideDuringCombat)
@@ -80,7 +90,7 @@ namespace XIVReminders
 
                     foreach (var manager in Managers)
                     {
-                        if (ImGui.BeginTabItem(manager.Name))
+                        if (ImGui.BeginTabItem($"{manager.Name}##managerwindow"))
                         {
                             manager.DrawConfigMenu();
                             ImGui.EndTabItem();
@@ -108,11 +118,15 @@ namespace XIVReminders
             }
 
             var showUi = Config.ShowUI;
-            if (ImGui.Begin("XIVReminder", ref showUi))
+            if (ImGui.Begin("XIVReminder##uiwindow", ref showUi))
             {
-                Config.ShowUI = showUi;
-                Config.Save();
-                if (ImGui.BeginTable("Reminders", 2, ImGuiTableFlags.Borders))
+                if (Config.ShowUI != showUi)
+                {
+                    Config.ShowUI = showUi;
+                    Config.Save();
+                }
+
+                if (ImGui.BeginTable("Reminders", 2, ImGuiTableFlags.Resizable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Borders))
                 {
                     ImGui.TableSetupColumn("Name");
                     ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch);
