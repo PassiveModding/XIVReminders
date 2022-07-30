@@ -1,10 +1,8 @@
-﻿using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
-using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using System;
-using System.Collections.Generic;
+﻿using Dalamud.Plugin;
+using XivCommon;
+using XIVReminders.Managers.Gear;
+using XIVReminders.Managers.Items;
+using XIVReminders.Managers.Retainers;
 
 namespace XIVReminders
 {
@@ -14,16 +12,24 @@ namespace XIVReminders
         internal Config Config { get; }
         internal PluginUI PluginUI { get; }
         internal Commands Commands { get; }
+        internal XivCommonBase XivCommon { get; }
 
         public Plugin(DalamudPluginInterface pluginInterface)
         {
             Dalamud.Initialize(pluginInterface);
 
-            this.Config = Dalamud.PluginInterface.GetPluginConfig() as Config ?? new Config();
-            this.Config.Initialize(Dalamud.PluginInterface);
-            this.PluginUI = new PluginUI(this.Config);
+            Config = Dalamud.PluginInterface.GetPluginConfig() as Config ?? new Config();
+            Config.Initialize(Dalamud.PluginInterface);
+            XivCommon = new XivCommonBase();
             Commands = Commands.GetCommands(Config);
             Commands.InitCommands();
+
+            this.PluginUI = new PluginUI(this.Config, new Managers.IBaseManager[]
+            {
+                new ItemManager(Config),
+                new RetainerManager(Config),
+                new GearManager(Config, XivCommon)
+            });
 
             Dalamud.PluginInterface.UiBuilder.Draw += PluginUI.Draw;
             Dalamud.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;

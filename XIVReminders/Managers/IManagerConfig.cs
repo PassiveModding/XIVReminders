@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XIVReminders.Modules.Retainer
+namespace XIVReminders.Managers
 {
-    internal class RetainerWatch
+    internal interface IManagerConfig
     {
+        public bool Enabled { get; set; }
     }
 }

@@ -1,24 +1,21 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using XIVReminders.Modules;
+using XIVReminders.Managers;
 
 namespace XIVReminders
 {
     internal class PluginUI : IDisposable
     {
-        public PluginUI(Config config)
+        public PluginUI(Config config, IBaseManager[] managers)
         {
             Config = config;
+            Managers = managers;
         }
 
         public Config Config { get; }
+        public IBaseManager[] Managers { get; }
 
         public void Dispose()
         {
@@ -26,8 +23,15 @@ namespace XIVReminders
 
         public void Draw()
         {
-            DrawUI();
-            DrawConfig();
+            try
+            {
+                DrawUI();
+                DrawConfig();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public void DrawConfig()
@@ -39,34 +43,33 @@ namespace XIVReminders
             if (ImGui.Begin("XIVReminder Settings", ref showSettings))
             {
                 Config.ShowSettings = showSettings;
-                Config.Save();
 
                 if (ImGui.BeginTabBar("ConfigMenuBar"))
                 {
                     if (ImGui.BeginTabItem("Config"))
                     {
                         var hideDuringCombat = Config.HideDuringCombat;
-                        if (ImGui.Checkbox("Hide During Combat", ref hideDuringCombat))
+                        if (ImGui.Checkbox("Hide During Combat", ref hideDuringCombat) && hideDuringCombat != Config.HideDuringCombat)
                         {
                             Config.HideDuringCombat = hideDuringCombat;
                             Config.Save();
                         }
 
                         var hideDuringInstance = Config.HideDuringInstance;
-                        if (ImGui.Checkbox("Hide During Instance", ref hideDuringInstance))
+                        if (ImGui.Checkbox("Hide During Instance", ref hideDuringInstance) && hideDuringInstance != Config.HideDuringInstance)
                         {
                             Config.HideDuringInstance = hideDuringInstance;
                             Config.Save();
                         }
 
                         var showUi = Config.ShowUI;
-                        if (ImGui.Checkbox("ShowUI", ref showUi))
+                        if (ImGui.Checkbox("Show Reminder Window", ref showUi) && showUi != Config.ShowUI)
                         {
                             Config.ShowUI = showUi;
                             Config.Save();
                         }
 
-                        if (ImGui.Button("Reset"))
+                        if (ImGui.Button("Reset All Settings"))
                         {
                             Config.Reset();
                             Config.Save();
@@ -75,18 +78,22 @@ namespace XIVReminders
                         ImGui.EndTabItem();
                     }
 
-                    if (ImGui.BeginTabItem("Currencies"))
+                    foreach (var manager in Managers)
                     {
-                        CurrencyAlerts.DrawConfig(Config);
-                        ImGui.EndTabItem();
+                        if (ImGui.BeginTabItem(manager.Name))
+                        {
+                            manager.DrawConfigMenu();
+                            ImGui.EndTabItem();
+                        }
                     }
+
+                    ImGui.EndTabBar();
                 }
             }
 
             ImGui.End();
         }
 
-        public static Random rnd = new Random();
         public void DrawUI()
         {
             if (!Config.ShowUI) return;
@@ -111,12 +118,9 @@ namespace XIVReminders
                     ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch);
                     ImGui.TableHeadersRow();
 
-                    var alerts = Unsafe.GetActiveCurrencyAlerts(Config);
-
-                    foreach (var alert in alerts)
+                    foreach (var manager in Managers)
                     {
-                        if (!alert.Enabled) continue;
-                        RenderRow(alert.DisplayName, alert.LastKnownValue.ToString());
+                        manager.DrawUiMenu();
                     }
                 }
 
@@ -124,15 +128,6 @@ namespace XIVReminders
             }
 
             ImGui.End();
-        }
-
-        private void RenderRow(string name, string value)
-        {
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(name);
-            ImGui.TableNextColumn();
-            ImGui.Text(value);
         }
     }
 }

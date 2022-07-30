@@ -2,29 +2,26 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XIVReminders.Modules;
-using static XIVReminders.Modules.CurrencyAlerts;
+using System.IO;
+using System.Reflection;
+using XIVReminders.Managers;
+using XIVReminders.Managers.Gear;
+using XIVReminders.Managers.Items;
+using XIVReminders.Managers.Retainers;
 
 namespace XIVReminders
 {
     internal class Config : IPluginConfiguration
     {
-        public Config()
-        {
-        }
-
         public int Version { get; set; } = 1;
-
         public bool HideDuringCombat { get; set; }
         public bool HideDuringInstance { get; set; }
         public bool ShowUI { get; set; }
         public bool ShowSettings { get; set; }
 
-        public CurrencyAlert[] Alerts { get; set; } = CurrencyAlerts.GetDefaults();
-        
+        public ItemConfig? Items { get; set; } = null;
+        public RetainerConfig? Retainers { get; set; } = null;
+        public GearConfig? Gear { get; set; } = null;
 
         [NonSerialized]
         private DalamudPluginInterface? pluginInterface;
@@ -36,11 +33,15 @@ namespace XIVReminders
 
         public void Save()
         {
-            this.pluginInterface?.SavePluginConfig(this);
+            pluginInterface?.SavePluginConfig(this);
         }
+
         public void Reset()
         {
-            Alerts = CurrencyAlerts.GetDefaults();
+            Items = ItemConfig.Default;
+            Retainers = RetainerConfig.Default;
+            Gear = GearConfig.Default;
+            Save();
         }
     }
 }
