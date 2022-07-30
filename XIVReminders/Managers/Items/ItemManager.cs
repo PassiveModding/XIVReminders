@@ -2,7 +2,6 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
-using System.Linq;
 using System.Threading;
 
 namespace XIVReminders.Managers.Items

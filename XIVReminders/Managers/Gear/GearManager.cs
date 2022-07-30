@@ -2,11 +2,7 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using XivCommon;
 
 namespace XIVReminders.Managers.Gear
@@ -44,7 +40,7 @@ namespace XIVReminders.Managers.Gear
         public void ReadGearData()
         {
             if (Config?.Gear == null) return;
-            if (!Config.Gear.Enabled) return; 
+            if (!Config.Gear.Enabled) return;
             if (!Helpers.IsPlayerAvailable()) return;
 
             int localMaxSpirit = int.MinValue;
@@ -150,7 +146,7 @@ namespace XIVReminders.Managers.Gear
 
             var show = Config.Gear.ShowExtraWindow;
 
-            if (ImGui.Begin("XIVReminder##extrarepairwindow", ref show, extraWindowFlags ))
+            if (ImGui.Begin("XIVReminder##extrarepairwindow", ref show, extraWindowFlags))
             {
                 if (MinConditionPercent < Config.Gear.CriticalConditionThreshold)
                     ImGui.Text($"Gear Condition Critical [{MinConditionPercent}%%]");
@@ -175,7 +171,7 @@ namespace XIVReminders.Managers.Gear
             if (Config?.Gear == null) return;
             if (!Config.Gear.Enabled) return;
             if (Config.Gear.Spiritbonds && MaxSpiritBondPercent >= 100)
-            { 
+            {
                 Helpers.RenderRow($"Spiritbond", $"{MaxSpiritBondPercent}%%");
                 if (Config.Gear.ShowMateriaExtractionButton)
                 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace XIVReminders.Managers.Retainers
 {
@@ -19,5 +15,5 @@ namespace XIVReminders.Managers.Retainers
                 HideRetainersUntilComplete = false,
                 PlayerRetainers = new Dictionary<ulong, RetainerAlert>()
             };
-     }
+    }
 }

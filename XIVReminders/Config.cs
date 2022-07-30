@@ -1,10 +1,6 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using XIVReminders.Managers;
 using XIVReminders.Managers.Gear;
 using XIVReminders.Managers.Items;
 using XIVReminders.Managers.Retainers;
