@@ -1,12 +1,18 @@
 ﻿{
   "Author": "Ramen",
   "Name": "XIVReminders",
-  "Punchline": "XIVReminders",
-  "Description": "XIVReminders",
-  "Tags": [ "Airship", "Gardening", "Crops", "Retainer", "Multiple Characters", "Account", "Timer", "Submarine", "Submersible", "Tasks", "Cactpot" ],
+  "Punchline": "Keep track of everything in one place",
+  "Description": "A plugin to track your Retainers, Gear wear, Spiritbonding, Tomestones and more!",
+  "Tags": [
+    "Retainer",
+    "Account",
+    "Timer",
+    "Tasks",
+    "Cactpot",
+    "Utility"
+  ],
   "InternalName": "XIVReminders",
-  "AssemblyVersion": "1.0.0.0",
-  "RepoUrl": null,
+  "RepoUrl": "https://github.com/PassiveModding/XIVReminders",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 6,
   "LoadPriority": 0,

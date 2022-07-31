@@ -8,8 +8,6 @@ namespace XIVReminders.Managers
         void DrawConfigMenu();
         void DrawUiMenu();
         void DrawExtraWindows();
-        public Config Config { get; init; }
-        public Timer CheckLoop { get; init; }
-        IManagerConfig GetConfig();
+        public Timer CheckLoop { get; }
     }
 }

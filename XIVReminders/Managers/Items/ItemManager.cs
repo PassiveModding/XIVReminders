@@ -2,20 +2,35 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
+using static XIVReminders.Managers.Items.Data;
 
 namespace XIVReminders.Managers.Items
 {
     internal class ItemManager : IBaseManager
     {
-        public string Name { get; init; } = "Items";
-        public Config Config { get; init; }
-        public Timer CheckLoop { get; init; }
+        public string Name { get;} = "Items";
+        public Dictionary<Item, int> CurrentItemQuantities { get; } = new Dictionary<Item, int>();
+
+        public Config Config { get; }
+        public Timer CheckLoop { get; }
+        public Dictionary<Item, ItemAttribute> ItemDefaults { get; }
+        public Dictionary<ItemCategory, (Item, ItemAttribute)[]> ItemCategories { get; }
 
         public ItemManager(Config config)
         {
-            Config = config;
+            Config = config;            
+            
+            // set defaults if they haven't been set already
             if (Config.Items == null) Config.Items = ItemConfig.Default;
+            if (Config.Items.Items == null) Config.Items.Items = ItemConfig.Default.Items;
+
+            ItemDefaults = GetItemEnumerator().ToDictionary(x => x.Item1, x => x.Item2);
+
+            // Build category index to reduce draw times for config ui
+            ItemCategories = ItemDefaults.GroupBy(x => x.Value.Category).ToDictionary(x => x.Key, x => x.Select(y => (y.Key, y.Value)).ToArray());
 
             CheckLoop = new Timer(e =>
             {
@@ -32,79 +47,94 @@ namespace XIVReminders.Managers.Items
 
         private void ReadCurrencyGameata()
         {
-            if (Config?.Items == null) return;
+            if (Config?.Items?.Items == null) return;
             if (!Helpers.IsPlayerAvailable()) return;
 
             unsafe
             {
                 InventoryManager* inventoryManager = InventoryManager.Instance();
-                foreach (var category in Config.Items.Categories)
+                foreach (var (item, config) in Config.Items.Items)
                 {
-                    if (category.Enabled == false) continue;
-                    foreach (var (id, item) in category.Items)
-                    {
-                        if (!item.Enabled) continue;
-                        item.LastKnownValue = inventoryManager->GetInventoryItemCount((uint)id);
-                    }
+                    if (!config.Enabled) continue;
+                    CurrentItemQuantities[item] = inventoryManager->GetInventoryItemCount((uint)item);
                 }
             }
         }
 
         public void DrawUiMenu()
         {
-            if (Config?.Items == null) return;
+            if (Config?.Items?.Items == null) return;
 
-            foreach (var category in Config.Items.Categories)
+            foreach (var (id, config) in Config.Items.Items)
             {
-                if (category.Enabled == false) continue;
-                foreach (var (id, item) in category.Items)
-                {
-                    if (!item.Enabled || item.LastKnownValue < item.Threshold) continue;
-                    Helpers.RenderRow(item.DisplayName, item.LastKnownValue.ToString());
-                }
+                // disabled in config
+                if (config == null || !config.Enabled) return;
+                // none recorded
+                if (!CurrentItemQuantities.ContainsKey(id) || !ItemDefaults.ContainsKey(id)) continue;
+                // below threshold
+                if (CurrentItemQuantities[id] < config.Threshold) continue;
+
+                Helpers.RenderRow(ItemDefaults[id].Name, CurrentItemQuantities[id].ToString());
             }
         }
 
+
         public void DrawConfigMenu()
         {
-            if (Config?.Items == null) return;
+            if (Config?.Items?.Items == null) return;
 
-            if (ImGui.BeginTabBar("Currencies"))
+            if (!ImGui.BeginTabBar("Currencies"))
             {
-                foreach (var category in Config.Items.Categories)
+                return;
+            }
+
+            foreach (var category in ItemCategories)
+            {
+                if (!ImGui.BeginTabItem($"{category.Key}##itemcategorysettings"))
                 {
-                    if (ImGui.BeginTabItem($"{category.Name}##itemcategorysettings"))
+                    continue;
+                }
+
+                foreach (var (id, item) in category.Value)
+                {
+                    if (!Config.Items.Items.ContainsKey(id))
                     {
-                        foreach (var (id, item) in category.Items)
+                        Config.Items.Items[id] = new ItemAlert
                         {
-                            var enabled = item.Enabled;
-                            var threshold = item.Threshold;
+                            Enabled = true,
+                            Threshold = item.DefaultThreshold
+                        };
+                    }
 
-                            if (ImGui.Checkbox(item.DisplayName, ref enabled) && enabled != item.Enabled)
-                            {
-                                item.Enabled = enabled;
-                                Config.Save();
-                            }
+                    var config = Config.Items.Items[id];
+                    var enabled = config.Enabled;
+                    var threshold = config.Threshold;
 
-                            // Label is used to define uniqueness of the inputs, use ## to hide the contents
-                            if (ImGui.SliderInt($"##{item.DisplayName}", ref threshold, 1, item.MaxValue) && threshold != item.Threshold)
-                            {
-                                item.Threshold = threshold;
-                                Config.Save();
-                            }
+                    if (ImGui.Checkbox(item.Name, ref enabled) && enabled != config.Enabled)
+                    {
+                        config.Enabled = enabled;
+                        Config.Save();
+                    }
 
-                            ImGui.SameLine();
-                            if (Helpers.IconButton(FontAwesomeIcon.Stop, $"reset{item.DisplayName}"))
-                            {
-                                item.Threshold = item.DefaultThreshold;
-                                Config.Save();
-                            }
-                        }
-                        ImGui.EndTabItem();
+                    // Label is used to define uniqueness of the inputs, use ## to hide the contents
+                    if (ImGui.SliderInt($"##{item.Name}", ref threshold, 1, item.MaxCount) && threshold != config.Threshold)
+                    {
+                        config.Threshold = threshold;
+                        Config.Save();
+                    }
+
+                    ImGui.SameLine();
+                    if (Helpers.IconButton(FontAwesomeIcon.Stop, $"reset{item.Name}"))
+                    {
+                        config.Threshold = item.DefaultThreshold;
+                        Config.Save();
                     }
                 }
-                ImGui.EndTabBar();
+
+                ImGui.EndTabItem();
             }
+
+            ImGui.EndTabBar();
         }
 
         public void DrawExtraWindows()
