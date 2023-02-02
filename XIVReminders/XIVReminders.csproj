@@ -16,7 +16,7 @@
 	<PropertyGroup>
 		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-		<AssemblyVersion>1.0.2</AssemblyVersion>
+		<AssemblyVersion>1.0.2.1</AssemblyVersion>
 		<BaseOutputPath>bin\</BaseOutputPath>
 	</PropertyGroup>
 

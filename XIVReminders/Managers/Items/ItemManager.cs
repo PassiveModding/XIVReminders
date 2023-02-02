@@ -68,7 +68,7 @@ namespace XIVReminders.Managers.Items
             foreach (var (id, config) in Config.Items.Items)
             {
                 // disabled in config
-                if (config == null || !config.Enabled) return;
+                if (config == null || !config.Enabled) continue;
                 // none recorded
                 if (!CurrentItemQuantities.ContainsKey(id) || !ItemDefaults.ContainsKey(id)) continue;
                 // below threshold
@@ -106,27 +106,27 @@ namespace XIVReminders.Managers.Items
                         };
                     }
 
-                    var config = Config.Items.Items[id];
-                    var enabled = config.Enabled;
-                    var threshold = config.Threshold;
+                    var itemConfig = Config.Items.Items[id];
+                    var enabled = itemConfig.Enabled;
+                    var threshold = itemConfig.Threshold;
 
-                    if (ImGui.Checkbox(item.Name, ref enabled) && enabled != config.Enabled)
+                    if (ImGui.Checkbox(item.Name, ref enabled) && enabled != itemConfig.Enabled)
                     {
-                        config.Enabled = enabled;
+                        itemConfig.Enabled = enabled;
                         Config.Save();
                     }
 
                     // Label is used to define uniqueness of the inputs, use ## to hide the contents
-                    if (ImGui.SliderInt($"##{item.Name}", ref threshold, 1, item.MaxCount) && threshold != config.Threshold)
+                    if (ImGui.SliderInt($"##{item.Name}", ref threshold, 1, item.MaxCount) && threshold != itemConfig.Threshold)
                     {
-                        config.Threshold = threshold;
+                        itemConfig.Threshold = threshold;
                         Config.Save();
                     }
 
                     ImGui.SameLine();
                     if (Helpers.IconButton(FontAwesomeIcon.Stop, $"reset{item.Name}"))
                     {
-                        config.Threshold = item.DefaultThreshold;
+                        itemConfig.Threshold = item.DefaultThreshold;
                         Config.Save();
                     }
                 }
