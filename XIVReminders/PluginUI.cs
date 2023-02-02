@@ -2,6 +2,7 @@
 using ImGuiNET;
 using System;
 using System.Numerics;
+using System.Text;
 using XIVReminders.Managers;
 
 namespace XIVReminders
@@ -50,7 +51,7 @@ namespace XIVReminders
             if (!showSettings) return;
 
             ImGui.SetNextWindowSize(new Vector2(700, 500), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin("XIVReminder Settings", ref showSettings))
+            if (ImGui.Begin($"XIVReminder Settings###{Constants.SETTINGS_WINDOW_ID}", ref showSettings))
             {
                 Config.ShowSettings = showSettings;
 
@@ -118,7 +119,17 @@ namespace XIVReminders
             }
 
             var showUi = Config.ShowUI;
-            if (ImGui.Begin("XIVReminder##uiwindow", ref showUi))
+            var titleContent = new StringBuilder();
+            foreach (var manager in Managers)
+            {
+                if (manager.TryFormatTitleContent(out string titleVal))
+                {
+                    titleContent.Append(titleVal);
+                }
+            }
+            if (titleContent.Length == 0) titleContent.Append("Reminders");
+
+            if (ImGui.Begin($"{titleContent}###{Constants.UI_WINDOW_ID}", ref showUi))
             {
                 if (Config.ShowUI != showUi)
                 {

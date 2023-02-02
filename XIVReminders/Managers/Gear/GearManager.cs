@@ -3,7 +3,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
 using System.Threading;
-using XivCommon;
 
 namespace XIVReminders.Managers.Gear
 {
@@ -15,13 +14,11 @@ namespace XIVReminders.Managers.Gear
         private int MinConditionPercent { get; set; } = 100;
 
         public Config Config { get; init; }
-        public XivCommonBase XivCommon { get; init; }
         public Timer CheckLoop { get; init; }
 
-        public GearManager(Config config, XivCommonBase xivCommon)
+        public GearManager(Config config)
         {
             Config = config;
-            XivCommon = xivCommon;
             if (Config.Gear == null) Config.Gear = GearConfig.Default;
 
             CheckLoop = new Timer(e =>
@@ -156,10 +153,6 @@ namespace XIVReminders.Managers.Gear
                 if (Config.Gear.ShowRepairButton)
                 {
                     ImGui.SameLine();
-                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "repairbutton"))
-                    {
-                        XivCommon.Functions.Chat.SendMessage("/gaction repair");
-                    }
                 }
 
                 ImGui.End();
@@ -176,10 +169,6 @@ namespace XIVReminders.Managers.Gear
                 if (Config.Gear.ShowMateriaExtractionButton)
                 {
                     ImGui.SameLine();
-                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "extractbutton"))
-                    {
-                        XivCommon.Functions.Chat.SendMessage("/gaction \"Materia Extraction\"");
-                    }
                 }
             }
 
@@ -199,12 +188,14 @@ namespace XIVReminders.Managers.Gear
                 if (Config.Gear.ShowRepairButton)
                 {
                     ImGui.SameLine();
-                    if (Helpers.IconButton(FontAwesomeIcon.Wrench, "repairbutton"))
-                    {
-                        XivCommon.Functions.Chat.SendMessage("/gaction repair");
-                    }
                 }
             }
+        }
+
+        public bool TryFormatTitleContent(out string titleContent)
+        {
+            titleContent = string.Empty;
+            return false;
         }
 
         public IManagerConfig GetConfig()

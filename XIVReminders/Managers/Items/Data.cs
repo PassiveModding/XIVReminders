@@ -43,13 +43,13 @@ namespace XIVReminders.Managers.Items
 
         public enum Item
         {
-            [Item("White Crafters' Scrip", 1500, 2000, ItemCategory.CrafterGatherer)]
+            [Item("White Crafters' Scrip", 3000, 4000, ItemCategory.CrafterGatherer)]
             WhiteCraftersScrip = 25199,
-            [Item("Purple Crafters' Scrip", 1500, 2000, ItemCategory.CrafterGatherer)]
+            [Item("Purple Crafters' Scrip", 3000, 4000, ItemCategory.CrafterGatherer)]
             PurpleCraftersScrip = 33913,
-            [Item("White Gatherers' Scrip", 1500, 2000, ItemCategory.CrafterGatherer)]
+            [Item("White Gatherers' Scrip", 3000, 4000, ItemCategory.CrafterGatherer)]
             WhiteGatherersScrip = 25200,
-            [Item("Purple Gatherers' Scrip", 1500, 2000, ItemCategory.CrafterGatherer)]
+            [Item("Purple Gatherers' Scrip", 3000, 4000, ItemCategory.CrafterGatherer)]
             PurpleGatherersScrip = 33914,
             [Item("Skybuilders Scrip", 7500, 10000, ItemCategory.CrafterGatherer)]
             SkybuildersScrip = 28063,
@@ -71,6 +71,8 @@ namespace XIVReminders.Managers.Items
             Aphorism = 42,
             [Item("Tomestones of Astronomy", 1400, 2000, ItemCategory.Battle)]
             Astronomy = 43,
+            [Item("Tomestones of Causality", 1400, 2000, ItemCategory.Battle)]
+            Causality = 44,
             [Item("Storm Seals", 75000, 90000, ItemCategory.GrandCompany)]
             StormSeals = 20,
             [Item("Serpent Seals", 75000, 90000, ItemCategory.GrandCompany)]

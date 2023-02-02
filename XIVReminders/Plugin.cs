@@ -1,5 +1,4 @@
 ﻿using Dalamud.Plugin;
-using XivCommon;
 using XIVReminders.Managers.Gear;
 using XIVReminders.Managers.Items;
 using XIVReminders.Managers.Retainers;
@@ -12,7 +11,6 @@ namespace XIVReminders
         internal Config Config { get; }
         internal PluginUI PluginUI { get; }
         internal Commands Commands { get; }
-        internal XivCommonBase XivCommon { get; }
 
         public Plugin(DalamudPluginInterface pluginInterface)
         {
@@ -20,7 +18,6 @@ namespace XIVReminders
 
             Config = Dalamud.PluginInterface.GetPluginConfig() as Config ?? new Config();
             Config.Initialize(Dalamud.PluginInterface);
-            XivCommon = new XivCommonBase();
             Commands = Commands.GetCommands(Config);
             Commands.InitCommands();
 
@@ -28,7 +25,7 @@ namespace XIVReminders
             {
                 new ItemManager(Config),
                 new RetainerManager(Config),
-                new GearManager(Config, XivCommon)
+                new GearManager(Config)
             });
 
             Dalamud.PluginInterface.UiBuilder.Draw += PluginUI.Draw;

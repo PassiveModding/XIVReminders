@@ -8,6 +8,7 @@ namespace XIVReminders.Managers
         void DrawConfigMenu();
         void DrawUiMenu();
         void DrawExtraWindows();
+        bool TryFormatTitleContent(out string titleContent);
         public Timer CheckLoop { get; }
     }
 }

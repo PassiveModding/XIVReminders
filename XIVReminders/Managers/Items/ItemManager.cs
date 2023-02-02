@@ -137,6 +137,12 @@ namespace XIVReminders.Managers.Items
             ImGui.EndTabBar();
         }
 
+        public bool TryFormatTitleContent(out string titleContent)
+        {
+            titleContent = string.Empty;
+            return false;
+        }
+
         public void DrawExtraWindows()
         {
 

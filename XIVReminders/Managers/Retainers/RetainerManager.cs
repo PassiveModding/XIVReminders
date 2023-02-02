@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace XIVReminders.Managers.Retainers
@@ -42,6 +43,7 @@ namespace XIVReminders.Managers.Retainers
                 {
                     var retainer = instance->GetRetainerBySortedIndex(i);
                     if (retainer->ClassJob == 0) continue;
+                    bool propertyChanged = false;
 
                     var retainerId = retainer->RetainerID;
                     RetainerAlert retAlert;
@@ -51,6 +53,7 @@ namespace XIVReminders.Managers.Retainers
                     }
                     else
                     {
+                        propertyChanged = true;
                         retAlert = new RetainerAlert
                         {
                             RetainerId = retainerId,
@@ -58,9 +61,24 @@ namespace XIVReminders.Managers.Retainers
                         };
                     }
 
-                    retAlert.Name = Helpers.ReadBytesAsString(retainer->Name, 32);
-                    retAlert.TimeStamp = Helpers.DateFromTimeStamp(retainer->VentureComplete);
-                    Config.Retainers.PlayerRetainers[retAlert.RetainerId] = retAlert;
+                    var retainerName = Helpers.ReadBytesAsString(retainer->Name, 32);
+                    if (retainerName != retAlert.Name)
+                    {
+                        propertyChanged = true;
+                        retAlert.Name = retainerName;
+                    }
+                    var timestamp = Helpers.DateFromTimeStamp(retainer->VentureComplete);
+                    if (retAlert.TimeStamp != timestamp)
+                    {
+                        propertyChanged = true;
+                        retAlert.TimeStamp = timestamp;
+                    }
+
+                    if (propertyChanged)
+                    {
+                        Config.Retainers.PlayerRetainers[retAlert.RetainerId] = retAlert;
+                        Config.Save();
+                    }
                 }
             }
         }
@@ -110,6 +128,21 @@ namespace XIVReminders.Managers.Retainers
                     Helpers.RenderRow($"{retainer.Name} complete", sinceStr.Length != 0 ? $"{sinceStr} ago" : "Now");
                 }
             }
+        }
+
+        public bool TryFormatTitleContent(out string titleContent)
+        {
+            titleContent = "";
+            if (Config?.Retainers == null) return false;
+            if (Config.Retainers.Enabled == false) return false;
+            var count = Config.Retainers.PlayerRetainers.Count(x => x.Value.TimeStamp < DateTime.UtcNow && !x.Value.IsHidden);
+            if (count > 0)
+            {
+                titleContent = $"{count} Retainers";
+                return true;
+            }
+
+            return false;
         }
 
         public void DrawExtraWindows()
